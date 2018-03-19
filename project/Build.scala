@@ -48,8 +48,9 @@ object ProjectBuild extends Build {
 }
 
 object Configuration {
-
-  val commonVersion = "0.2.22-SNAPSHOT"
+  lazy val artifactoryHost =
+    "internal-bipro-artifactory-1634906620.us-east-1.elb.amazonaws.com"
+  val commonVersion = "0.2.21-letgo"
   val projectScalaVersion = "2.12.1"
   val specs2Version = "3.8.6"
 
@@ -80,28 +81,28 @@ object Configuration {
       Opts.compile.encoding("UTF8")
         :+ Opts.compile.deprecation
         :+ Opts.compile.unchecked
-        :+ "-feature"
-    ,
+        :+ "-feature",
     testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
-    scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
+    scalacOptions in doc := Seq(
+      "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
     crossScalaVersions := Seq(projectScalaVersion, "2.10.6", "2.11.8"),
-    javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
+    javacOptions := Seq("-source",
+                        "1.6",
+                        "-target",
+                        "1.6",
+                        "-encoding",
+                        "UTF8"),
     organization := "com.github.mauricio",
     version := commonVersion,
     parallelExecution := false,
     publishArtifact in Test := false,
     publishMavenStyle := true,
-    pomIncludeRepository := {
-      _ => false
+    pomIncludeRepository := { _ =>
+      false
     },
-    publishTo <<= version {
-      v: String =>
-        val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT"))
-          Some("snapshots" at nexus + "content/repositories/snapshots")
-        else
-          Some("releases" at nexus + "service/local/staging/deploy/maven2")
-    },
+    publishTo := Some(
+      "spark-release-local" at s"http://$artifactoryHost/artifactory/spark-release-local"),
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     pomExtra := (
       <url>https://github.com/mauricio/postgresql-async</url>
         <licenses>
@@ -122,7 +123,7 @@ object Configuration {
             <url>https://github.com/mauricio</url>
           </developer>
         </developers>
-      )
+    )
   )
 
 }
